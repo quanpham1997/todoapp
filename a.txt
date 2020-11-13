@@ -1,0 +1,14 @@
+What we’ll build
+
+We’ll build a classic and simple Golang API server that connects to a front-end page. Our Golang API server will use:
+
+    MySQL as our database
+    GORM as an ORM to interact with our database
+    Request router using gorilla/mux
+    Logrus for logging 
+
+We’ll be building what’s on the right side of the diagram. The specifications for our API Server are:
+
+    It listens to port 8000 on the localhost
+    It has five endpoints: healthz, createItem, getCompletedItems, getIncompleteItems, updateItem, and deleteItem
+    The TodoItem model consists of Id, Description, and Completed status attributes

@@ -1,0 +1,2 @@
+go run todolist.go
+sudo docker exec -it mysql mysql -uroot -proot
