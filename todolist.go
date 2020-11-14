@@ -29,6 +29,10 @@ func CreateItem(w http.ResponseWriter, r *http.Request){
 	
 	db.Create(&todo)	//After that, we create the todo object and persist it in our database
 	result			:=db.Last(&todo)
+	//// Get last record, order by primary key desc
+	// SELECT * FROM users ORDER BY id DESC LIMIT 1;
+	
+
 	w.Header().Set("Content-type","application/json") // set your content-type header so clients know to expect json
 	json.NewEncoder(w).Encode(result.Value)
 	// Lastly, we query the database and return the query 
@@ -45,7 +49,7 @@ func Healthz(w http.ResponseWriter, r *http.Request){
 func init(){
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetReportCaller(true)
-// set up our logrus logger settings.
+	// set up our logrus logger settings.
 }
 
 func UpdateItem(w http.ResponseWriter, r *http.Request){
@@ -61,12 +65,21 @@ func UpdateItem(w http.ResponseWriter, r *http.Request){
 		} else{ 
 			log.WithFields(log.Fields{"Id":id}).Info("Deleting TodoItem")
 			todo := &TodoItemModel{}
-			db.First(&todo , id)
-			db.Delete(&todo)
+			db.First(&todo , id) // Retrieving objects with primary key 
+								// // SELECT * FROM todo_item_models WHERE id = _ ;
+
+			db.Delete(&todo)// DELETE from emails where id = 10;
+
 			w.Header().Set("Content-Type", "application/json")
 			io.WriteString(w, `{"deleted":true}`)
 		}
 }
+
+
+
+
+
+
 
 
 func GetItemById(Id int)bool{ 
@@ -79,9 +92,29 @@ func GetItemById(Id int)bool{
 	return true
 }
 
+func GetTodoItems(completed bool) interface{}{ 
+	var todos []TodoItemModel
+	TodoItems := db.Where("completed = ?", completed).Find(&todos).Value 
+	// Slice of primary keys
+	//	select * from todo_item_models where completed = 0;
+	//+----+--------------+-----------+
+	//| id | description  | completed |
+	//+----+--------------+-----------+
+	//|  1 | Feed the Cat |         0 |
+	//|  2 | Feed the Dog |         0 |
+	//|  3 | Eat pasta    |         0 |
+	//+----+--------------+-----------+
+	//
+
+	return TodoItems
+}
+
+
+
+
 
 func GetCompleteItems(w http.ResponseWriter, r *http.Request){ 
-	log.info("Get completed TodoItem")
+	log.Info("Get completed TodoItem")
 	completedTodoItems := GetTodoItems(true)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(completedTodoItems)
@@ -92,7 +125,7 @@ func GetCompleteItems(w http.ResponseWriter, r *http.Request){
 
 func GetIncompleteItems(w http.ResponseWriter, r *http.Request){ 
 	log.Info("Get Incomplete TodoItem")
-	IncomplteTodoItems := GetTodoItems(false)
+	IncompleteTodoItems := GetTodoItems(false)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(IncompleteTodoItems)
 
